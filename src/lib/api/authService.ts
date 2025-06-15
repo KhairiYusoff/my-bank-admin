@@ -1,11 +1,11 @@
 import apiClient from './apiClient';
 
-interface LoginCredentials {
+export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   token: string;
   refreshToken?: string;
   user?: {

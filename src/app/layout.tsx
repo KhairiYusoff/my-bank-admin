@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { QueryProvider } from '../lib/react-query/QueryProvider'
 
 export const metadata: Metadata = {
   title: 'My Bank Admin Portal',
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-gray-50">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   )
