@@ -1,46 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useLogin } from '@/lib/hooks'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  
+  // Use the login mutation from our React Query hook
+  const { mutate: login, isPending: isLoading, error: loginError } = useLogin()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError('')
-
-    try {
-      // This would be replaced with an actual API call to your backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.msg || 'Login failed')
+    
+    // Use the login mutation from our React Query hook
+    login({ email, password }, {
+      onError: (err: Error) => {
+        setError(err.message || 'An error occurred during login')
       }
-
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token)
-      
-      // Redirect to dashboard
-      router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during login')
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
   return (
@@ -52,9 +32,9 @@ export default function Login() {
           </h2>
         </div>
         
-        {error && (
+        {(error || loginError) && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span className="block sm:inline">{error}</span>
+            <span className="block sm:inline">{error || (loginError as Error)?.message || 'Login failed'}</span>
           </div>
         )}
         

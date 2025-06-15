@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCustomers, useAllAccounts, useAllTransactions, User, Account, Transaction } from '@/lib/hooks'
 
 interface DashboardStats {
   totalUsers: number;
@@ -10,46 +10,22 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalAccounts: 0,
-    totalTransactions: 0,
-    activeUsers: 0
-  })
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // This would be replaced with actual API calls to your backend
-    // Simulating API call with timeout
-    const fetchDashboardData = async () => {
-      try {
-        // In a real implementation, you would fetch data from your API
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/dashboard`, {
-        //   headers: {
-        //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-        //   }
-        // })
-        // const data = await response.json()
-        
-        // For now, we'll use mock data
-        setTimeout(() => {
-          setStats({
-            totalUsers: 156,
-            totalAccounts: 243,
-            totalTransactions: 1892,
-            activeUsers: 87
-          })
-          setIsLoading(false)
-        }, 1000)
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-        setIsLoading(false)
-      }
-    }
-
-    fetchDashboardData()
-  }, [])
-
+  // Use React Query hooks to fetch data
+  const { data: customers, isLoading: isLoadingCustomers } = useCustomers();
+  const { data: accounts, isLoading: isLoadingAccounts } = useAllAccounts();
+  const { data: transactions, isLoading: isLoadingTransactions } = useAllTransactions();
+  
+  // Calculate dashboard stats from fetched data
+  const stats: DashboardStats = {
+    totalUsers: Array.isArray(customers) ? customers.length : 0,
+    totalAccounts: Array.isArray(accounts) ? accounts.length : 0,
+    totalTransactions: Array.isArray(transactions) ? transactions.length : 0,
+    activeUsers: Array.isArray(customers) ? customers.filter((user: User) => user.status === 'active').length : 0
+  };
+  
+  // Check if any data is still loading
+  const isLoading = isLoadingCustomers || isLoadingAccounts || isLoadingTransactions;
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
